@@ -1,6 +1,6 @@
 # ContractReview
 
-`$9` AI red-flag scanner for contracts. Upload PDF or paste text, get back structured review (critical / negotiate / looks-fine / questions) with a 0-100 risk score. Built for the person being asked to sign — not for B2B legal teams.
+`$5` AI red-flag scanner for contracts. Upload PDF or paste text, get back structured review (critical / negotiate / looks-fine / questions) with a 0-100 risk score. Built for the person being asked to sign — not for B2B legal teams.
 
 Live at: **https://contract.stromation.com**
 
@@ -8,7 +8,7 @@ Live at: **https://contract.stromation.com**
 
 - **Frontend:** Static HTML/CSS/JS, GitHub Pages, brand palette is rose-red on white (differs from PolicyBot's indigo). Same `Instrument Serif + Source Sans 3` typography as PolicyBot for visual coherence.
 - **Backend:** n8n workflow at `n8n.stromation.com` handles checkout / fulfill / status modes on a single webhook.
-- **Payments:** Stripe live mode (one-time $9 checkout).
+- **Payments:** Stripe live mode (one-time $5 checkout).
 - **AI:** GPT-4o for the analysis pass, returns strict JSON schema.
 - **DB:** Supabase table `contractreview_jobs` stores form data + extracted contract text, keyed by Stripe session_id.
 
@@ -112,11 +112,11 @@ contractreview/
 
 ## Pricing & unit economics
 
-- Price: `$9` one-time
-- Stripe fee: ~$0.55
+- Price: `$5` one-time
+- Stripe fee: ~$0.45
 - OpenAI cost (GPT-4o, ~5K input tokens average + 800 output): ~$0.04
 - Supabase + GH Pages + n8n: shared with other Stromation products, marginal cost ~$0.01
-- **Net per sale: ~$8.40**
+- **Net per sale: ~$4.45**
 
 ## Disclaimer footprint
 
