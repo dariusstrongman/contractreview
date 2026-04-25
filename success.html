@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ENJXKWKERJ"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-ENJXKWKERJ');gtag('event','purchase',{value:9,currency:'USD'});</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Reviewing Your Contract... &mdash; ContractReview</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Source Sans 3',system-ui,sans-serif;background:#F8FAFB;color:#111827;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
+.card{max-width:620px;width:100%;background:#fff;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,.06);padding:3rem;text-align:center}
+.icon{width:64px;height:64px;background:#FFF1F2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem}
+.icon svg{width:32px;height:32px;color:#E11D48}
+h1{font-family:'Instrument Serif',Georgia,serif;font-size:2rem;font-weight:400;margin-bottom:.5rem}
+.sub{font-size:1.05rem;color:#6B7280;margin-bottom:2rem}
+.loading{display:flex;align-items:center;justify-content:center;gap:.5rem;font-size:.95rem;color:#E11D48;margin-bottom:1.5rem}
+.spinner{width:20px;height:20px;border:2px solid #E5E7EB;border-top-color:#E11D48;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.review-block{display:none;text-align:left}
+.score-row{display:flex;gap:1rem;margin-bottom:2rem;flex-wrap:wrap}
+.score{flex:1;min-width:120px;background:#F8FAFB;border:1px solid #E5E7EB;border-radius:8px;padding:1rem;text-align:center}
+.score-label{font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;color:#9CA3AF;font-weight:600;margin-bottom:.25rem}
+.score-value{font-family:'Instrument Serif',Georgia,serif;font-size:2rem;color:#111827}
+.flag-block{margin-bottom:1.25rem;border-radius:8px;border:1px solid #E5E7EB;padding:1.25rem}
+.flag-block.red{border-left:4px solid #E11D48}
+.flag-block.amber{border-left:4px solid #D97706}
+.flag-block.green{border-left:4px solid #059669}
+.flag-block h3{font-family:'Instrument Serif',Georgia,serif;font-size:1.15rem;color:#111827;margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem}
+.flag-block h3 .dot{width:10px;height:10px;border-radius:50%}
+.flag-block.red .dot{background:#E11D48}
+.flag-block.amber .dot{background:#D97706}
+.flag-block.green .dot{background:#059669}
+.flag-block ul{list-style:none;margin:0}
+.flag-block li{font-size:.9rem;color:#374151;line-height:1.6;padding:.5rem 0;border-bottom:1px solid #F1F5F9}
+.flag-block li:last-child{border-bottom:none}
+.flag-block li strong{color:#111827}
+.email-note{font-size:.88rem;color:#059669;background:#ECFDF5;padding:.75rem 1rem;border-radius:8px;margin-top:1rem;display:none}
+.error{color:#DC2626;font-size:.95rem;display:none}
+.template-notice{background:#FEF3C7;border:1px solid #F59E0B;border-radius:8px;padding:1rem 1.15rem;margin-top:1.25rem;text-align:left;font-size:.83rem;color:#7C2D12;line-height:1.55}
+.template-notice strong{color:#7C2D12}
+.template-notice a{color:#E11D48;font-weight:600;text-decoration:underline}
+.footer{margin-top:2rem;font-size:.78rem;color:#9CA3AF}
+.footer a{color:#E11D48;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="card">
+<div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
+<h1>Payment Received</h1>
+<p class="sub">Reviewing your contract...</p>
+<div class="loading" id="loadingState"><div class="spinner"></div> This takes about 30 seconds.</div>
+<div class="error" id="errorState"></div>
+<div class="review-block" id="reviewBlock">
+  <div class="score-row">
+    <div class="score"><div class="score-label">Risk Score</div><div class="score-value" id="riskScore">--</div></div>
+    <div class="score"><div class="score-label">Critical Flags</div><div class="score-value" id="redCount">--</div></div>
+    <div class="score"><div class="score-label">To Negotiate</div><div class="score-value" id="amberCount">--</div></div>
+  </div>
+  <div id="redBlock" class="flag-block red"><h3><span class="dot"></span> Critical issues</h3><ul id="redList"></ul></div>
+  <div id="amberBlock" class="flag-block amber"><h3><span class="dot"></span> Worth negotiating</h3><ul id="amberList"></ul></div>
+  <div id="greenBlock" class="flag-block green"><h3><span class="dot"></span> Looks fine</h3><ul id="greenList"></ul></div>
+  <div id="questionsBlock" class="flag-block" style="border-left:4px solid #6366F1">
+    <h3 style="color:#111827"><span class="dot" style="background:#6366F1"></span> Ask before you sign</h3>
+    <ul id="questionsList"></ul>
+  </div>
+  <div class="email-note" id="emailNote">Full review also sent to your email.</div>
+  <div class="template-notice"><strong>Reminder:</strong> this is an AI red-flag scan, not legal advice. Read the actual contract yourself, and consult an attorney for high-stakes situations (real estate, equity grants, partnership agreements, regulated industries). <a href="disclaimer.html" target="_blank" rel="noopener">Read full disclaimer</a>.</div>
+</div>
+<div class="footer"><a href="https://contract.stromation.com">ContractReview</a> by <a href="https://www.stromation.com">Stromation</a> &middot; <a href="disclaimer.html">Disclaimer</a></div>
+</div>
+
+<script>
+function getQuery(name){var m=new RegExp('[?&]'+name+'=([^&#]*)').exec(location.search);return m?decodeURIComponent(m[1].replace(/\+/g,' ')):'';}
+var sessionId = getQuery('session_id');
+var loadingState = document.getElementById('loadingState');
+var reviewBlock = document.getElementById('reviewBlock');
+var emailNote = document.getElementById('emailNote');
+var errorState = document.getElementById('errorState');
+
+async function poll(attempts){
+  attempts = attempts || 0;
+  if (attempts > 20) {
+    loadingState.style.display = 'none';
+    errorState.style.display = 'block';
+    errorState.textContent = 'The review is taking longer than expected. Check your email in a few minutes, or contact us if it does not arrive.';
+    return;
+  }
+  try {
+    var resp = await fetch('https://n8n.stromation.com/webhook/contract-review-status?session_id=' + encodeURIComponent(sessionId));
+    if (!resp.ok) throw new Error('not ready');
+    var data = await resp.json();
+    if (data && data.status === 'ready' && data.review) {
+      render(data.review);
+    } else {
+      setTimeout(function(){ poll(attempts+1); }, 3000);
+    }
+  } catch(e) {
+    setTimeout(function(){ poll(attempts+1); }, 3000);
+  }
+}
+
+function appendList(ul, items){
+  if (!items || !items.length){
+    ul.innerHTML = '<li style="color:#9CA3AF;">None found.</li>';
+    return;
+  }
+  items.forEach(function(it){
+    var li = document.createElement('li');
+    if (typeof it === 'string') {
+      li.textContent = it;
+    } else {
+      var h = '<strong>' + (it.clause || it.title || 'Issue') + '</strong>';
+      if (it.summary || it.description) h += ' &mdash; ' + (it.summary || it.description);
+      if (it.recommendation) h += '<br><em style="color:#6B7280">' + it.recommendation + '</em>';
+      li.innerHTML = h;
+    }
+    ul.appendChild(li);
+  });
+}
+
+function render(review){
+  loadingState.style.display = 'none';
+  reviewBlock.style.display = 'block';
+  emailNote.style.display = 'block';
+  document.getElementById('riskScore').textContent = (review.risk_score != null ? review.risk_score : '--') + '/100';
+  var red = review.critical || [];
+  var amber = review.negotiate || [];
+  var green = review.looks_fine || [];
+  var questions = review.questions || [];
+  document.getElementById('redCount').textContent = red.length;
+  document.getElementById('amberCount').textContent = amber.length;
+  appendList(document.getElementById('redList'), red);
+  appendList(document.getElementById('amberList'), amber);
+  appendList(document.getElementById('greenList'), green);
+  appendList(document.getElementById('questionsList'), questions);
+}
+
+if (sessionId) poll();
+else {
+  loadingState.style.display = 'none';
+  errorState.style.display = 'block';
+  errorState.textContent = 'Missing session ID. Check your email for the review.';
+}
+</script>
+</body>
+</html>
