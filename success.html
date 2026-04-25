@@ -80,25 +80,48 @@ var reviewBlock = document.getElementById('reviewBlock');
 var emailNote = document.getElementById('emailNote');
 var errorState = document.getElementById('errorState');
 
-async function poll(attempts){
-  attempts = attempts || 0;
-  if (attempts > 20) {
+async function loadReview() {
+  // Call fulfill - this kicks off the AI analysis on first call (~30 sec)
+  // and returns cached review on subsequent calls. Single shot, no polling.
+  try {
+    var ctl = new AbortController();
+    var timer = setTimeout(function(){ ctl.abort(); }, 90000);
+    var resp = await fetch(
+      'https://n8n.stromation.com/webhook/contract-review?mode=fulfill&session_id=' + encodeURIComponent(sessionId),
+      { signal: ctl.signal }
+    );
+    clearTimeout(timer);
+    var data = await resp.json();
+    if (data && data.status === 'ready' && data.review) {
+      render(data.review);
+    } else if (data && data.error) {
+      throw new Error(data.error);
+    } else {
+      // Maybe still processing - try one more time after a delay
+      setTimeout(retry, 5000);
+    }
+  } catch(e) {
     loadingState.style.display = 'none';
     errorState.style.display = 'block';
-    errorState.textContent = 'The review is taking longer than expected. Check your email in a few minutes, or contact us if it does not arrive.';
-    return;
+    errorState.textContent = 'The review is taking longer than expected. Check your email in a few minutes - we have it. ' + (e.message ? '(' + e.message + ')' : '');
   }
+}
+
+async function retry() {
   try {
-    var resp = await fetch('https://n8n.stromation.com/webhook/contract-review-status?session_id=' + encodeURIComponent(sessionId));
-    if (!resp.ok) throw new Error('not ready');
+    var resp = await fetch('https://n8n.stromation.com/webhook/contract-review?mode=status&session_id=' + encodeURIComponent(sessionId));
     var data = await resp.json();
     if (data && data.status === 'ready' && data.review) {
       render(data.review);
     } else {
-      setTimeout(function(){ poll(attempts+1); }, 3000);
+      loadingState.style.display = 'none';
+      errorState.style.display = 'block';
+      errorState.textContent = 'The review is taking longer than expected. Check your email shortly.';
     }
   } catch(e) {
-    setTimeout(function(){ poll(attempts+1); }, 3000);
+    loadingState.style.display = 'none';
+    errorState.style.display = 'block';
+    errorState.textContent = 'Could not load review. Check your email - the review was sent there.';
   }
 }
 
@@ -138,7 +161,7 @@ function render(review){
   appendList(document.getElementById('questionsList'), questions);
 }
 
-if (sessionId) poll();
+if (sessionId) loadReview();
 else {
   loadingState.style.display = 'none';
   errorState.style.display = 'block';
